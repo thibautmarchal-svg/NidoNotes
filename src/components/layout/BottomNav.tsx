@@ -66,7 +66,7 @@ export default function BottomNav() {
   if (location.pathname === '/classes' || !currentClass) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-20 md:hidden pb-safe"
+    <nav className="fixed bottom-0 left-0 right-0 z-20 pb-safe"
       style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-default)' }}>
       <div className="flex">
         {items.map(item => (
