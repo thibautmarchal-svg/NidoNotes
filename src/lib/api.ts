@@ -1,4 +1,4 @@
-import type { Teacher, Class, Period, Student, Subject, SubSubject, Evaluation, Grade } from '../types';
+import type { Teacher, Class, Period, Student, Subject, SubSubject, Evaluation, Grade, Objective } from '../types';
 
 const BASE = '/NidoNotes/api';
 
@@ -77,6 +77,16 @@ export const evaluationsApi = {
   update: (id: number, data: Omit<Evaluation, 'id' | 'class_id' | 'created_at'>) =>
     request<Evaluation>(`/evaluations.php?id=${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: number) => request<{ ok: boolean }>(`/evaluations.php?id=${id}`, { method: 'DELETE' }),
+};
+
+export const objectivesApi = {
+  listForEval: (evaluation_id: number) => request<Objective[]>(`/objectives.php?evaluation_id=${evaluation_id}`),
+  listForClass: (class_id: number) => request<Objective[]>(`/objectives.php?class_id=${class_id}`),
+  create: (evaluation_id: number, name: string) =>
+    request<Objective>('/objectives.php', { method: 'POST', body: JSON.stringify({ evaluation_id, name }) }),
+  deleteAllForEval: (evaluation_id: number) =>
+    request<{ ok: boolean }>(`/objectives.php?evaluation_id=${evaluation_id}`, { method: 'DELETE' }),
+  delete: (id: number) => request<{ ok: boolean }>(`/objectives.php?id=${id}`, { method: 'DELETE' }),
 };
 
 export const gradesApi = {

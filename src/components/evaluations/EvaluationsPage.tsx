@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { evaluationsApi, subjectsApi, periodsApi } from '../../lib/api';
+import { evaluationsApi, subjectsApi, periodsApi, objectivesApi } from '../../lib/api';
 import { useClass } from '../../contexts/ClassContext';
 import { useToast } from '../../contexts/ToastContext';
 import Modal from '../ui/Modal';
@@ -29,7 +29,9 @@ export default function EvaluationsPage() {
     sub_subject_id: null as number | null,
     weight: 1,
     max_score: 10,
+    objectives: [] as string[],
   });
+  const [objInput, setObjInput] = useState('');
 
   useEffect(() => {
     if (currentClass) loadAll();
@@ -56,6 +58,7 @@ export default function EvaluationsPage() {
 
   function openCreate() {
     setEditing(null);
+    setObjInput('');
     setForm({
       name: '',
       date: new Date().toISOString().slice(0, 10),
@@ -64,12 +67,19 @@ export default function EvaluationsPage() {
       sub_subject_id: null,
       weight: 1,
       max_score: 10,
+      objectives: [],
     });
     setModalOpen(true);
   }
 
-  function openEdit(ev: Evaluation) {
+  async function openEdit(ev: Evaluation) {
     setEditing(ev);
+    setObjInput('');
+    let objs: string[] = [];
+    try {
+      const loaded = await objectivesApi.listForEval(ev.id);
+      objs = loaded.map(o => o.name);
+    } catch { /* offline */ }
     setForm({
       name: ev.name,
       date: ev.date,
@@ -78,8 +88,20 @@ export default function EvaluationsPage() {
       sub_subject_id: ev.sub_subject_id,
       weight: ev.weight,
       max_score: ev.max_score ?? 10,
+      objectives: objs,
     });
     setModalOpen(true);
+  }
+
+  function addObjective() {
+    const trimmed = objInput.trim();
+    if (!trimmed) return;
+    setForm(f => ({ ...f, objectives: [...f.objectives, trimmed] }));
+    setObjInput('');
+  }
+
+  function removeObjective(idx: number) {
+    setForm(f => ({ ...f, objectives: f.objectives.filter((_, i) => i !== idx) }));
   }
 
   const currentSubject = subjects.find(s => s.id === form.subject_id);
@@ -90,14 +112,22 @@ export default function EvaluationsPage() {
     if (!form.period_id) { toast('Veuillez sélectionner une période', 'error'); return; }
     setSaving(true);
     try {
-      const data = { ...form, class_id: currentClass.id };
+      const { objectives: _objs, ...formData } = form;
+      const data = { ...formData, class_id: currentClass.id };
       if (editing) {
         const updated = await evaluationsApi.update(editing.id, data);
         setEvaluations(prev => prev.map(ev => ev.id === updated.id ? updated : ev));
+        await objectivesApi.deleteAllForEval(editing.id);
+        for (const name of form.objectives) {
+          await objectivesApi.create(editing.id, name);
+        }
         toast('Évaluation modifiée');
       } else {
         const created = await evaluationsApi.create(data);
         setEvaluations(prev => [...prev, created].sort((a, b) => a.date.localeCompare(b.date)));
+        for (const name of form.objectives) {
+          await objectivesApi.create(created.id, name);
+        }
         toast('Évaluation ajoutée');
       }
       setModalOpen(false);
@@ -304,6 +334,42 @@ export default function EvaluationsPage() {
                   }
                 >×{w}</button>
               ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Objectifs</label>
+            {form.objectives.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {form.objectives.map((obj, idx) => (
+                  <span key={idx} className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--creme)', color: 'var(--terre)' }}>
+                    {obj}
+                    <button type="button" onClick={() => removeObjective(idx)}
+                      className="ml-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center hover:bg-black/10"
+                      style={{ color: 'var(--ocre)' }}>
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={objInput}
+                onChange={e => setObjInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addObjective(); } }}
+                placeholder="Ex: Savoir additionner les fractions…"
+                className="flex-1 px-3 py-2 rounded-xl text-sm focus:outline-none"
+                style={{ background: 'var(--bg-raised)', border: '1.5px solid var(--border-default)', color: 'var(--text-primary)' }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--ocre)')}
+                onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+              />
+              <button type="button" onClick={addObjective}
+                className="px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0"
+                style={{ background: 'var(--ocre)', color: '#fff' }}>
+                +
+              </button>
             </div>
           </div>
           <div className="flex gap-3 pt-2">

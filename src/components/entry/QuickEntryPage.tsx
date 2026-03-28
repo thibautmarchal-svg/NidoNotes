@@ -101,8 +101,6 @@ export default function QuickEntryPage() {
     }
   }, [selectedEvalId, grades, online]);
 
-  const maxScore = selectedEval?.max_score ?? 10;
-
   async function handleScoreCommit(studentId: number, raw: string) {
     const cleaned = raw.replace(',', '.');
     const score = cleaned === '' ? null : parseFloat(cleaned);
@@ -131,6 +129,7 @@ export default function QuickEntryPage() {
   }
 
   const selectedEval = evaluations.find(e => e.id === selectedEvalId);
+  const maxScore = selectedEval?.max_score ?? 10;
   const subjectName  = selectedEval ? (subjects.find(s => s.id === selectedEval.subject_id)?.name ?? '—') : '';
   const subSubName   = selectedEval?.sub_subject_id
     ? subjects.flatMap(s => s.sub_subjects).find(ss => ss.id === selectedEval.sub_subject_id)?.name ?? null

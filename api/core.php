@@ -158,6 +158,16 @@ function migrate(): void
     if (empty($c)) {
         $pdo->exec("ALTER TABLE nido_notes_evaluations ADD COLUMN max_score DECIMAL(6,2) NOT NULL DEFAULT 10 AFTER weight");
     }
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS nido_notes_objectives (
+        id            INT AUTO_INCREMENT PRIMARY KEY,
+        teacher_id    INT          NOT NULL,
+        evaluation_id INT          NOT NULL,
+        name          VARCHAR(255) NOT NULL,
+        created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_eval (evaluation_id),
+        INDEX idx_teacher (teacher_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }
 migrate();
 

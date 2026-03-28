@@ -66,6 +66,17 @@ export interface Grade {
 
 export type GradeMap = Record<string, Grade>;
 
+export interface Objective {
+  id: number;
+  evaluation_id: number;
+  name: string;
+  subject_id?: number;
+  sub_subject_id?: number | null;
+  eval_name?: string;
+  period_id?: number;
+  created_at?: string;
+}
+
 export interface SyncQueueItem {
   id?: number;
   entity: string;
