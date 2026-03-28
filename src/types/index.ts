@@ -4,8 +4,24 @@ export interface Teacher {
   email: string;
 }
 
+export interface Class {
+  id: number;
+  name: string;
+  school_year: string | null;
+  created_at?: string;
+}
+
+export interface Period {
+  id: number;
+  class_id: number;
+  name: string;
+  order_num: number;
+  created_at?: string;
+}
+
 export interface Student {
   id: number;
+  class_id: number;
   first_name: string;
   last_name: string;
   created_at?: string;
@@ -13,6 +29,7 @@ export interface Student {
 
 export interface Subject {
   id: number;
+  class_id: number;
   name: string;
   created_at?: string;
   sub_subjects: SubSubject[];
@@ -27,6 +44,8 @@ export interface SubSubject {
 
 export interface Evaluation {
   id: number;
+  class_id: number;
+  period_id: number;
   name: string;
   date: string;
   subject_id: number;
@@ -36,7 +55,6 @@ export interface Evaluation {
 }
 
 export interface Grade {
-  id?: number;
   student_id: number;
   evaluation_id: number;
   score: number | null;
@@ -45,16 +63,13 @@ export interface Grade {
   updated_at?: string;
 }
 
-// Clé pour la map des notes : `${student_id}_${evaluation_id}`
 export type GradeMap = Record<string, Grade>;
 
 export interface SyncQueueItem {
   id?: number;
-  entity: 'students' | 'subjects' | 'sub_subjects' | 'evaluations' | 'grades';
-  action: 'create' | 'update' | 'delete';
+  entity: string;
+  action: string;
   data: Record<string, unknown>;
   timestamp: number;
   attempts: number;
 }
-
-export type SyncStatus = 'idle' | 'syncing' | 'error';

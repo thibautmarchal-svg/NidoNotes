@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useClass } from '../../contexts/ClassContext';
 
 const items = [
   {
@@ -49,6 +50,12 @@ const items = [
 ];
 
 export default function BottomNav() {
+  const { currentClass } = useClass();
+  const location = useLocation();
+
+  // On /classes, don't show the bottom nav (it's the class selector page)
+  if (location.pathname === '/classes' || !currentClass) return null;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 md:hidden pb-safe"
       style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-default)' }}>

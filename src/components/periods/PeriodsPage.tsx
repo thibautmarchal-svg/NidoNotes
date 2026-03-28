@@ -1,32 +1,30 @@
 import { useState, useEffect } from 'react';
-import { studentsApi } from '../../lib/api';
+import { periodsApi } from '../../lib/api';
 import { useClass } from '../../contexts/ClassContext';
 import { useToast } from '../../contexts/ToastContext';
 import Modal from '../ui/Modal';
-import type { Student } from '../../types';
+import type { Period } from '../../types';
 
-export default function StudentsPage() {
+export default function PeriodsPage() {
   const toast = useToast();
   const { currentClass } = useClass();
-  const [students, setStudents] = useState<Student[]>([]);
-  const [search, setSearch] = useState('');
+  const [periods, setPeriods] = useState<Period[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Student | null>(null);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [editing, setEditing] = useState<Period | null>(null);
+  const [periodName, setPeriodName] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (currentClass) loadStudents();
+    if (currentClass) loadPeriods();
   }, [currentClass?.id]);
 
-  async function loadStudents() {
+  async function loadPeriods() {
     if (!currentClass) return;
     setLoading(true);
     try {
-      const remote = await studentsApi.list(currentClass.id);
-      setStudents(remote);
+      const list = await periodsApi.list(currentClass.id);
+      setPeriods(list.sort((a, b) => a.order_num - b.order_num));
     } catch {
       // offline
     } finally {
@@ -34,20 +32,15 @@ export default function StudentsPage() {
     }
   }
 
-  const filtered = students.filter(s => {
-    const q = search.toLowerCase();
-    return !q || s.last_name.toLowerCase().includes(q) || s.first_name.toLowerCase().includes(q);
-  });
-
   function openCreate() {
     setEditing(null);
-    setFirstName(''); setLastName('');
+    setPeriodName('');
     setModalOpen(true);
   }
 
-  function openEdit(s: Student) {
-    setEditing(s);
-    setFirstName(s.first_name); setLastName(s.last_name);
+  function openEdit(p: Period) {
+    setEditing(p);
+    setPeriodName(p.name);
     setModalOpen(true);
   }
 
@@ -57,13 +50,13 @@ export default function StudentsPage() {
     setSaving(true);
     try {
       if (editing) {
-        const updated = await studentsApi.update(editing.id, firstName, lastName);
-        setStudents(prev => prev.map(s => s.id === updated.id ? updated : s));
-        toast('Élève modifié');
+        const updated = await periodsApi.update(editing.id, periodName);
+        setPeriods(prev => prev.map(p => p.id === editing.id ? updated : p));
+        toast('Période modifiée');
       } else {
-        const created = await studentsApi.create(currentClass.id, firstName, lastName);
-        setStudents(prev => [...prev, created].sort((a, b) => a.last_name.localeCompare(b.last_name)));
-        toast('Élève ajouté');
+        const created = await periodsApi.create(currentClass.id, periodName);
+        setPeriods(prev => [...prev, created].sort((a, b) => a.order_num - b.order_num));
+        toast('Période ajoutée');
       }
       setModalOpen(false);
     } catch (err: unknown) {
@@ -73,12 +66,12 @@ export default function StudentsPage() {
     }
   }
 
-  async function handleDelete(s: Student) {
-    if (!confirm(`Supprimer ${s.first_name} ${s.last_name} et toutes ses notes ?`)) return;
+  async function handleDelete(p: Period) {
+    if (!confirm(`Supprimer la période "${p.name}" ? Les évaluations liées doivent d'abord être supprimées.`)) return;
     try {
-      await studentsApi.delete(s.id);
-      setStudents(prev => prev.filter(x => x.id !== s.id));
-      toast('Élève supprimé');
+      await periodsApi.delete(p.id);
+      setPeriods(prev => prev.filter(x => x.id !== p.id));
+      toast('Période supprimée');
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : 'Erreur', 'error');
     }
@@ -88,7 +81,7 @@ export default function StudentsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--terre)' }}>Élèves</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--terre)' }}>Périodes</h1>
           {currentClass && (
             <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>{currentClass.name}</p>
           )}
@@ -104,49 +97,36 @@ export default function StudentsPage() {
         </button>
       </div>
 
-      {/* Recherche */}
-      <div className="relative mb-4">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          type="text" placeholder="Rechercher un élève…"
-          value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none"
-          style={{ background: 'var(--bg-raised)', border: '1.5px solid var(--border-default)', color: 'var(--text-primary)' }}
-          onFocus={e => (e.currentTarget.style.borderColor = 'var(--ocre)')}
-          onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
-        />
+      <div className="mb-4 rounded-2xl p-4 text-sm" style={{ background: 'var(--creme)', color: 'var(--bois)' }}>
+        Les périodes représentent les trimestres ou semestres de l'année scolaire. La moyenne annuelle est calculée comme la moyenne des moyennes de chaque période.
       </div>
 
       {loading ? (
         <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>Chargement…</div>
-      ) : filtered.length === 0 ? (
+      ) : periods.length === 0 ? (
         <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
-          {search ? 'Aucun résultat' : 'Aucun élève — cliquez sur Ajouter pour commencer'}
+          Aucune période — créez votre premier trimestre ou semestre
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-          {filtered.map((s, i) => (
+          {periods.map((p, i) => (
             <div
-              key={s.id}
-              className={`flex items-center justify-between px-5 py-3.5 ${i > 0 ? 'border-t' : ''}`}
+              key={p.id}
+              className={`flex items-center justify-between px-5 py-4 ${i > 0 ? 'border-t' : ''}`}
               style={i > 0 ? { borderColor: 'var(--border-subtle)' } : undefined}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm"
+                  className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm"
                   style={{ background: 'var(--creme)', color: 'var(--ocre)' }}
                 >
-                  {s.first_name.charAt(0)}{s.last_name.charAt(0)}
+                  {p.order_num}
                 </div>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                  {s.last_name} {s.first_name}
-                </span>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
               </div>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => openEdit(s)}
+                  onClick={() => openEdit(p)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg transition"
                   style={{ color: 'var(--text-muted)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-raised)')}
@@ -157,7 +137,7 @@ export default function StudentsPage() {
                   </svg>
                 </button>
                 <button
-                  onClick={() => handleDelete(s)}
+                  onClick={() => handleDelete(p)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 transition"
                   onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -172,30 +152,18 @@ export default function StudentsPage() {
         </div>
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Modifier l'élève" : 'Ajouter un élève'}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Modifier la période' : 'Nouvelle période'}>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Prénom</label>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Nom de la période</label>
             <input
               type="text" required autoFocus
-              value={firstName} onChange={e => setFirstName(e.target.value)}
+              value={periodName} onChange={e => setPeriodName(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl focus:outline-none"
               style={{ background: 'var(--bg-raised)', border: '1.5px solid var(--border-default)', color: 'var(--text-primary)' }}
               onFocus={e => (e.currentTarget.style.borderColor = 'var(--ocre)')}
               onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
-              placeholder="Marie"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Nom</label>
-            <input
-              type="text" required
-              value={lastName} onChange={e => setLastName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl focus:outline-none"
-              style={{ background: 'var(--bg-raised)', border: '1.5px solid var(--border-default)', color: 'var(--text-primary)' }}
-              onFocus={e => (e.currentTarget.style.borderColor = 'var(--ocre)')}
-              onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
-              placeholder="Dupont"
+              placeholder="Trimestre 1, Semestre 1…"
             />
           </div>
           <div className="flex gap-3 pt-2">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useClass } from '../../contexts/ClassContext';
 import { authApi } from '../../lib/api';
 
 type View = 'login' | 'register' | 'forgot';
@@ -30,6 +31,7 @@ function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
 
 export default function AuthPage() {
   const { login, register } = useAuth();
+  const { loadClasses } = useClass();
   const [view, setView] = useState<View>('login');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -44,7 +46,10 @@ export default function AuthPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setLoading(true);
-    try { await login(loginEmail, loginPassword); }
+    try {
+      await login(loginEmail, loginPassword);
+      await loadClasses();
+    }
     catch (err: unknown) { setError(err instanceof Error ? err.message : 'Erreur de connexion'); }
     finally { setLoading(false); }
   };

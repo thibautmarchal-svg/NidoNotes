@@ -1,28 +1,6 @@
-import { db, seedFromServer } from './db';
-import { studentsApi, subjectsApi, evaluationsApi, gradesApi } from './api';
+import { db } from './db';
+import { gradesApi } from './api';
 import type { SyncQueueItem } from '../types';
-
-let isSyncing = false;
-
-export async function syncAll(): Promise<void> {
-  if (isSyncing) return;
-  isSyncing = true;
-  try {
-    // 1. Pull depuis le serveur
-    const [students, subjects, evaluations, grades] = await Promise.all([
-      studentsApi.list(),
-      subjectsApi.list(),
-      evaluationsApi.list(),
-      gradesApi.list(),
-    ]);
-    await seedFromServer({ students, subjects, evaluations, grades });
-
-    // 2. Push la queue en attente
-    await processSyncQueue();
-  } finally {
-    isSyncing = false;
-  }
-}
 
 export async function processSyncQueue(): Promise<void> {
   const items = await db.sync_queue.orderBy('timestamp').toArray();
@@ -30,8 +8,7 @@ export async function processSyncQueue(): Promise<void> {
     try {
       await processSyncItem(item);
       await db.sync_queue.delete(item.id!);
-    } catch (e) {
-      // Incrémenter les tentatives, abandonner après 5
+    } catch {
       if (item.attempts >= 5) {
         await db.sync_queue.delete(item.id!);
       } else {
@@ -52,8 +29,6 @@ async function processSyncItem(item: SyncQueueItem): Promise<void> {
       comment:       d.comment       as string | null,
     });
   }
-  // Les autres entités nécessitent une connexion pour être créées/modifiées
-  // (gestion simplifiée — la queue sert principalement pour les notes)
 }
 
 export async function queueGradeSave(grade: {
@@ -63,7 +38,6 @@ export async function queueGradeSave(grade: {
   is_absent: boolean;
   comment?: string | null;
 }): Promise<void> {
-  // Supprimer l'entrée existante pour ce couple student/eval si elle existe
   const existing = await db.sync_queue
     .where('entity').equals('grades')
     .and(item => item.data.student_id === grade.student_id && item.data.evaluation_id === grade.evaluation_id)
