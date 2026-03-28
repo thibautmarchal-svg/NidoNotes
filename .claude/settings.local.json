@@ -7,7 +7,16 @@
       "Read(//c/Users/ThibautMarchal/AppData/Local/Programs/**)",
       "Bash(find \"C:/Users/ThibautMarchal/Documents/Claude/Mate&Chill\" -type f -name config.* -o -name settings.*)",
       "Bash(find C:/Users/ThibautMarchal/Documents/Claude/appli_gestion_de_photos_vacances -type f -name config.* -o -name settings.*)",
-      "Bash(find C:/Users/ThibautMarchal/Documents/Claude -type f \\\\\\(-name .env* -o -name *.json -o -name *.yml -o -name *.yaml -o -name *.php \\\\\\))"
+      "Bash(find C:/Users/ThibautMarchal/Documents/Claude -type f \\\\\\(-name .env* -o -name *.json -o -name *.yml -o -name *.yaml -o -name *.php \\\\\\))",
+      "Bash(npx tsc:*)",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && npx tsc --noEmit 2>&1\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && npx tsc --noEmit\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git status\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git status && git diff --stat\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git status 2>&1 && echo ---DONE---\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git add -A && git status\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git add -A && git status && git diff --cached --stat\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git add -A && git commit -m \\\\\"feat: classes, periodes et moyennes annuelles\\\\\" && git push\")"
     ]
   }
 }

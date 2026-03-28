@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { db, upsertGrade } from '../../lib/db';
 import { gradesApi, studentsApi, subjectsApi, evaluationsApi, periodsApi } from '../../lib/api';
 import { queueGradeSave } from '../../lib/sync';
@@ -38,8 +39,9 @@ interface CommentModal {
 }
 
 export default function GradesPage() {
-  const toast  = useToast();
-  const online = useOnlineStatus();
+  const toast    = useToast();
+  const online   = useOnlineStatus();
+  const navigate = useNavigate();
   const { currentClass } = useClass();
 
   const [students,    setStudents]    = useState<Student[]>([]);
@@ -221,7 +223,14 @@ export default function GradesPage() {
 
   if (loading) return <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>Chargement…</div>;
   if (!students.length) return <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>Aucun élève — ajoutez des élèves d'abord</div>;
-  if (!periods.length) return <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>Créez d'abord des périodes (Périodes dans le menu)</div>;
+  if (!periods.length) return (
+    <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
+      Créez d'abord des périodes.{' '}
+      <button onClick={() => navigate('/periodes')} className="underline font-medium" style={{ color: 'var(--ocre)' }}>
+        Aller aux périodes →
+      </button>
+    </div>
+  );
 
   // Annual view (activePeriodId === null)
   const isAnnual = activePeriodId === null;

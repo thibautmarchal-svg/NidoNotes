@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { evaluationsApi, subjectsApi, periodsApi } from '../../lib/api';
 import { useClass } from '../../contexts/ClassContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -9,6 +10,7 @@ const WEIGHTS = [0.5, 1, 1.5, 2, 3];
 
 export default function EvaluationsPage() {
   const toast = useToast();
+  const navigate = useNavigate();
   const { currentClass } = useClass();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -168,10 +170,14 @@ export default function EvaluationsPage() {
         <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>Chargement…</div>
       ) : evaluations.length === 0 ? (
         <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
-          {periods.length === 0
-            ? 'Créez d\'abord des périodes (trimestres), puis des évaluations.'
-            : 'Aucune évaluation — cliquez sur Ajouter pour commencer'
-          }
+          {periods.length === 0 ? (
+            <>
+              Créez d'abord des périodes (trimestres).{' '}
+              <button onClick={() => navigate('/periodes')} className="underline font-medium" style={{ color: 'var(--ocre)' }}>
+                Aller aux périodes →
+              </button>
+            </>
+          ) : 'Aucune évaluation — cliquez sur Ajouter pour commencer'}
         </div>
       ) : visibleEvals.length === 0 ? (
         <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>Aucune évaluation pour cette période</div>
