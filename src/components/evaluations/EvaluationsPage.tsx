@@ -4,7 +4,7 @@ import { evaluationsApi, subjectsApi, periodsApi, objectivesApi } from '../../li
 import { useClass } from '../../contexts/ClassContext';
 import { useToast } from '../../contexts/ToastContext';
 import Modal from '../ui/Modal';
-import type { Evaluation, Subject, Period } from '../../types';
+import type { Evaluation, Subject, Period, Objective } from '../../types';
 
 const WEIGHTS = [0.5, 1, 1.5, 2, 3];
 
@@ -20,6 +20,8 @@ export default function EvaluationsPage() {
   const [editing, setEditing] = useState<Evaluation | null>(null);
   const [saving, setSaving] = useState(false);
   const [filterPeriodId, setFilterPeriodId] = useState<number | 'all'>('all');
+  const [allObjectives, setAllObjectives] = useState<Objective[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -41,14 +43,16 @@ export default function EvaluationsPage() {
     if (!currentClass) return;
     setLoading(true);
     try {
-      const [remoteEvals, remoteSubjects, remotePeriods] = await Promise.all([
+      const [remoteEvals, remoteSubjects, remotePeriods, remoteObjs] = await Promise.all([
         evaluationsApi.list(currentClass.id),
         subjectsApi.list(currentClass.id),
         periodsApi.list(currentClass.id),
+        objectivesApi.listForClass(currentClass.id),
       ]);
       setEvaluations(remoteEvals);
       setSubjects(remoteSubjects);
       setPeriods(remotePeriods.sort((a, b) => a.order_num - b.order_num));
+      setAllObjectives(remoteObjs);
     } catch {
       // offline
     } finally {
@@ -353,24 +357,21 @@ export default function EvaluationsPage() {
                 ))}
               </div>
             )}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={objInput}
-                onChange={e => setObjInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addObjective(); } }}
-                placeholder="Ex: Savoir additionner les fractions…"
-                className="flex-1 px-3 py-2 rounded-xl text-sm focus:outline-none"
-                style={{ background: 'var(--bg-raised)', border: '1.5px solid var(--border-default)', color: 'var(--text-primary)' }}
-                onFocus={e => (e.currentTarget.style.borderColor = 'var(--ocre)')}
-                onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
-              />
-              <button type="button" onClick={addObjective}
-                className="px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0"
-                style={{ background: 'var(--ocre)', color: '#fff' }}>
-                +
-              </button>
-            </div>
+            <ObjectiveInput
+              value={objInput}
+              onChange={setObjInput}
+              onAdd={addObjective}
+              allObjectives={allObjectives}
+              selected={form.objectives}
+              onSelect={name => {
+                if (!form.objectives.includes(name)) {
+                  setForm(f => ({ ...f, objectives: [...f.objectives, name] }));
+                }
+                setObjInput('');
+              }}
+              showSuggestions={showSuggestions}
+              setShowSuggestions={setShowSuggestions}
+            />
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={() => setModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-xl transition" style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }} onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-raised)')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>Annuler</button>
@@ -378,6 +379,65 @@ export default function EvaluationsPage() {
           </div>
         </form>
       </Modal>
+    </div>
+  );
+}
+
+function ObjectiveInput({ value, onChange, onAdd, allObjectives, selected, onSelect, showSuggestions, setShowSuggestions }: {
+  value: string;
+  onChange: (v: string) => void;
+  onAdd: () => void;
+  allObjectives: Objective[];
+  selected: string[];
+  onSelect: (name: string) => void;
+  showSuggestions: boolean;
+  setShowSuggestions: (v: boolean) => void;
+}) {
+  // Noms uniques de tous les objectifs existants, hors déjà sélectionnés
+  const allNames = Array.from(new Set(allObjectives.map(o => o.name)));
+  const suggestions = allNames.filter(name =>
+    !selected.includes(name) &&
+    (value.trim() === '' || name.toLowerCase().includes(value.toLowerCase()))
+  );
+
+  return (
+    <div className="relative">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onFocus={e => { e.currentTarget.style.borderColor = 'var(--ocre)'; setShowSuggestions(true); }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; setTimeout(() => setShowSuggestions(false), 150); }}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onAdd(); } }}
+          placeholder="Nouvel objectif ou choisir ci-dessous…"
+          className="flex-1 px-3 py-2 rounded-xl text-sm focus:outline-none"
+          style={{ background: 'var(--bg-raised)', border: '1.5px solid var(--border-default)', color: 'var(--text-primary)' }}
+        />
+        <button type="button" onClick={onAdd}
+          className="px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0"
+          style={{ background: 'var(--ocre)', color: '#fff' }}>
+          +
+        </button>
+      </div>
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-10 left-0 right-10 mt-1 rounded-xl overflow-hidden shadow-lg"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', maxHeight: 180, overflowY: 'auto' }}>
+          {suggestions.map(name => (
+            <button
+              key={name}
+              type="button"
+              onMouseDown={() => onSelect(name)}
+              className="w-full text-left px-3 py-2 text-sm transition"
+              style={{ color: 'var(--text-primary)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--creme)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
