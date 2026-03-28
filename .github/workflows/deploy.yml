@@ -1,0 +1,51 @@
+name: Build et déploiement FTP
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Build et déployer sur le serveur
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Build React
+        run: npm run build
+
+      - name: Déployer le frontend (dist/)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: 193.104.37.156
+          username: tmarchal-ftp
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /www/NidoNotes/
+          local-dir: ./dist/
+          exclude: |
+            **/.git*
+            **/.git*/**
+
+      - name: Déployer l'API PHP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: 193.104.37.156
+          username: tmarchal-ftp
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /www/NidoNotes/api/
+          local-dir: ./api/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/config.php

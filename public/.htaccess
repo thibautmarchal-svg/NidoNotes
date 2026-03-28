@@ -1,0 +1,36 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # API PHP — laisser passer
+    RewriteRule ^api/ - [L]
+
+    # Sessions — accès direct interdit
+    RewriteRule ^sessions/ - [F,L]
+
+    # Fichiers et dossiers existants — servir directement
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Tout le reste → index.html (SPA)
+    RewriteRule ^ index.html [L]
+</IfModule>
+
+# Cache assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                  "access plus 1 week"
+    ExpiresByType application/javascript    "access plus 1 week"
+    ExpiresByType image/jpeg                "access plus 1 month"
+    ExpiresByType image/png                 "access plus 1 month"
+    ExpiresByType image/svg+xml             "access plus 1 month"
+    ExpiresByType image/webp                "access plus 1 month"
+</IfModule>
+
+# Sécurité
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
