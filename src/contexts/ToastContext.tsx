@@ -15,6 +15,12 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 let counter = 0;
 
+function toastBackground(type: Toast['type']): string {
+  if (type === 'success') return '#4CAF78';
+  if (type === 'error')   return '#E05050';
+  return 'var(--ocre)';
+}
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -34,10 +40,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map(t => (
           <div
             key={t.id}
-            className={`pointer-events-auto px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium max-w-sm w-full transition-all ${
-              t.type === 'success' ? 'bg-green-600' :
-              t.type === 'error'   ? 'bg-red-600'   : 'bg-blue-600'
-            }`}
+            className="pointer-events-auto px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium max-w-sm w-full transition-all"
+            style={{ background: toastBackground(t.type) }}
           >
             {t.message}
           </div>

@@ -17,11 +17,11 @@ function scoreColor(score: number | null): string {
   return 'text-green-600';
 }
 
-function scoreBg(score: number | null): string {
-  if (score === null) return 'bg-slate-100 dark:bg-slate-700';
-  if (score < 5) return 'bg-red-50 dark:bg-red-900/20';
-  if (score <= 7) return 'bg-orange-50 dark:bg-orange-900/20';
-  return 'bg-green-50 dark:bg-green-900/20';
+function scoreBg(score: number | null): { background: string; color?: string } {
+  if (score === null) return { background: 'var(--bg-raised)' };
+  if (score < 5) return { background: '#fef2f2' };
+  if (score <= 7) return { background: '#fff7ed' };
+  return { background: '#f0fdf4' };
 }
 
 function formatScore(score: number | null): string {
@@ -97,14 +97,14 @@ export default function Dashboard() {
   const countBelow = (threshold: number) =>
     students.filter(s => { const a = avgGeneral(s.id); return a !== null && a < threshold; }).length;
 
-  if (loading) return <div className="text-center py-12 text-slate-400">Chargement…</div>;
+  if (loading) return <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>Chargement…</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Tableau de bord</h1>
+      <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--terre)' }}>Tableau de bord</h1>
 
       {!students.length ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16" style={{ color: 'var(--text-muted)' }}>
           <p className="text-lg">Bienvenue dans Nido Notes !</p>
           <p className="text-sm mt-2">Commencez par ajouter des élèves et des matières.</p>
         </div>
@@ -126,36 +126,40 @@ export default function Dashboard() {
           {/* Distribution */}
           {classAvg !== null && (
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-4 text-center">
+              <div className="rounded-2xl p-4 text-center" style={{ background: '#f0fdf4' }}>
                 <div className="text-2xl font-bold text-green-600">{countAbove(7)}</div>
-                <div className="text-xs text-green-700 dark:text-green-400 mt-1">Au-dessus de 7</div>
+                <div className="text-xs text-green-700 mt-1">Au-dessus de 7</div>
               </div>
-              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-2xl p-4 text-center">
+              <div className="rounded-2xl p-4 text-center" style={{ background: '#fff7ed' }}>
                 <div className="text-2xl font-bold text-orange-500">{students.length - countAbove(7) - countBelow(5)}</div>
-                <div className="text-xs text-orange-700 dark:text-orange-400 mt-1">Entre 5 et 7</div>
+                <div className="text-xs text-orange-700 mt-1">Entre 5 et 7</div>
               </div>
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-4 text-center">
+              <div className="rounded-2xl p-4 text-center" style={{ background: '#fef2f2' }}>
                 <div className="text-2xl font-bold text-red-600">{countBelow(5)}</div>
-                <div className="text-xs text-red-700 dark:text-red-400 mt-1">En dessous de 5</div>
+                <div className="text-xs text-red-700 mt-1">En dessous de 5</div>
               </div>
             </div>
           )}
 
           {/* Liste élèves */}
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Moyennes par élève</h2>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Moyennes par élève</h2>
+          <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
             {students.map((student, i) => {
               const gen = avgGeneral(student.id);
               return (
                 <div
                   key={student.id}
-                  className={`flex items-center px-5 py-3.5 gap-3 ${i > 0 ? 'border-t border-slate-100 dark:border-slate-700' : ''}`}
+                  className={`flex items-center px-5 py-3.5 gap-3 ${i > 0 ? 'border-t' : ''}`}
+                  style={i > 0 ? { borderColor: 'var(--border-subtle)' } : undefined}
                 >
-                  <div className="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-semibold text-sm flex-shrink-0">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0"
+                    style={{ background: 'var(--creme)', color: 'var(--ocre)' }}
+                  >
                     {student.first_name.charAt(0)}{student.last_name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-900 dark:text-white text-sm">
+                    <div className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
                       {student.last_name} {student.first_name}
                     </div>
                     {/* Moyennes par matière */}
@@ -163,14 +167,17 @@ export default function Dashboard() {
                       {subjects.map(s => {
                         const avg = avgSubject(student.id, s);
                         return avg !== null ? (
-                          <span key={s.id} className="text-xs text-slate-500">
+                          <span key={s.id} className="text-xs" style={{ color: 'var(--text-muted)' }}>
                             {s.name}: <span className={`font-semibold ${scoreColor(avg)}`}>{formatScore(avg)}</span>
                           </span>
                         ) : null;
                       })}
                     </div>
                   </div>
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm ${scoreBg(gen)} ${scoreColor(gen)}`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm ${scoreColor(gen)}`}
+                    style={scoreBg(gen)}
+                  >
                     {formatScore(gen)}
                   </div>
                 </div>
@@ -185,10 +192,10 @@ export default function Dashboard() {
 
 function StatCard({ label, value, icon, valueClass }: { label: string; value: string; icon: string; valueClass?: string }) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
+    <div className="rounded-2xl p-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
       <div className="text-2xl mb-1">{icon}</div>
-      <div className={`text-2xl font-bold ${valueClass ?? 'text-slate-900 dark:text-white'}`}>{value}</div>
-      <div className="text-xs text-slate-500 mt-0.5">{label}</div>
+      <div className={`text-2xl font-bold ${valueClass ?? ''}`} style={!valueClass ? { color: 'var(--text-primary)' } : undefined}>{value}</div>
+      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{label}</div>
     </div>
   );
 }

@@ -23,12 +23,18 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: P
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${widthClass} max-h-[90vh] flex flex-col overflow-hidden`}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-          <h2 className="font-semibold text-slate-900 dark:text-white">{title}</h2>
+      <div
+        className={`relative rounded-2xl shadow-2xl w-full ${widthClass} max-h-[90vh] flex flex-col overflow-hidden`}
+        style={{ background: 'var(--bg-surface)', boxShadow: 'var(--shadow-lg)' }}
+      >
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-500"
+            className="w-8 h-8 flex items-center justify-center rounded-full transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-raised)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

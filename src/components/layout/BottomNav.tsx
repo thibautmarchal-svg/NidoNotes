@@ -50,20 +50,19 @@ const items = [
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 md:hidden pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-20 md:hidden pb-safe"
+      style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-default)' }}>
       <div className="flex">
         {items.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
-            className={({ isActive }) =>
-              `flex-1 flex flex-col items-center py-2 text-xs transition-colors ${
-                isActive
-                  ? 'text-primary-600 dark:text-primary-400'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-primary-600'
-              }`
-            }
+            className="flex-1 flex flex-col items-center py-2 text-xs transition-all"
+            style={({ isActive }) => ({
+              color: isActive ? 'var(--ocre)' : 'var(--text-muted)',
+              fontWeight: isActive ? 600 : 400,
+            })}
           >
             {item.icon}
             <span className="mt-0.5">{item.label}</span>

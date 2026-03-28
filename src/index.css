@@ -3,17 +3,71 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --ocre:   #EF9F27;
+    --sable:  #FAC775;
+    --creme:  #FAEEDA;
+    --terre:  #412402;
+    --bois:   #633806;
+
+    --bg-base:    #FBF7F1;
+    --bg-surface: #FFFFFF;
+    --bg-raised:  #F5EDE0;
+    --bg-overlay: #EDE0CC;
+
+    --text-primary:   #1A1008;
+    --text-secondary: #633806;
+    --text-muted:     #9A7040;
+    --text-disabled:  #C8A878;
+
+    --border-subtle:  rgba(65,36,2,.07);
+    --border-default: rgba(65,36,2,.13);
+    --border-strong:  rgba(65,36,2,.28);
+
+    --shadow-sm: 0 2px 8px rgba(65,36,2,.08);
+    --shadow-md: 0 4px 20px rgba(65,36,2,.12);
+    --shadow-lg: 0 8px 40px rgba(65,36,2,.16);
+
+    --radius-xs:   6px;
+    --radius-sm:  10px;
+    --radius-md:  14px;
+    --radius-lg:  20px;
+    --radius-xl:  28px;
+    --radius-full: 9999px;
+
+    --tr-fast:   120ms ease;
+    --tr-normal: 220ms ease;
+    --tr-slow:   380ms ease;
+  }
+
+  .dark {
+    --bg-base:    #0E0C0A;
+    --bg-surface: #181410;
+    --bg-raised:  #221C14;
+    --bg-overlay: #2E2418;
+
+    --text-primary:   #F0E8D8;
+    --text-secondary: #C8A878;
+    --text-muted:     #8A7060;
+    --text-disabled:  #4A3828;
+
+    --border-subtle:  rgba(239,159,39,.10);
+    --border-default: rgba(239,159,39,.18);
+    --border-strong:  rgba(239,159,39,.35);
+
+    --shadow-sm: 0 2px 8px rgba(0,0,0,.30);
+    --shadow-md: 0 4px 20px rgba(0,0,0,.40);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,.50);
+  }
+
   html {
     font-family: 'DM Sans', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    @apply bg-slate-50 text-slate-900;
-  }
-
-  .dark body {
-    @apply bg-slate-900 text-slate-100;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
   }
 }
 
@@ -22,17 +76,22 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-  /* Safe area pour les appareils avec encoche */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+
+  .bg-base    { background-color: var(--bg-base); }
+  .bg-surface { background-color: var(--bg-surface); }
+  .bg-raised  { background-color: var(--bg-raised); }
+  .text-main  { color: var(--text-primary); }
+  .text-sub   { color: var(--text-secondary); }
+  .text-muted { color: var(--text-muted); }
+  .border-nido { border-color: var(--border-default); }
 }
 
-/* Table des notes */
+/* ── Tableau des notes ──────────────────────────────────────── */
 .grades-table {
   border-collapse: separate;
   border-spacing: 0;
@@ -40,17 +99,17 @@
 
 .grades-table th,
 .grades-table td {
-  border-right: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .grades-table th:first-child,
 .grades-table td:first-child {
-  border-left: 1px solid #e2e8f0;
+  border-left: 1px solid var(--border-subtle);
 }
 
 .grades-table tr:first-child th {
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* Colonne élève fixe */
@@ -58,14 +117,30 @@
   position: sticky;
   left: 0;
   z-index: 10;
-  background: white;
+  background: var(--bg-surface);
 }
 
-.dark .sticky-col {
-  background: #1e293b;
-}
+/* Scores */
+.score-red    { color: #E05050; font-weight: 600; }
+.score-orange { color: #D48A1A; font-weight: 600; }
+.score-green  { color: #4CAF78; font-weight: 600; }
 
-/* Score colors */
-.score-red    { @apply text-red-600 font-semibold; }
-.score-orange { @apply text-orange-500 font-semibold; }
-.score-green  { @apply text-green-600 font-semibold; }
+/* Boutons Nido */
+.btn-primary {
+  background: var(--ocre);
+  color: var(--terre);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: 0.625rem 1.25rem;
+  transition: background var(--tr-fast), box-shadow var(--tr-fast);
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: #D48A1A;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
