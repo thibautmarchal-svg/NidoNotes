@@ -154,6 +154,10 @@ function migrate(): void
     if (empty($c)) {
         $pdo->exec("ALTER TABLE nido_notes_evaluations ADD COLUMN period_id INT NOT NULL DEFAULT 0 AFTER class_id, ADD INDEX idx_period_eval (period_id)");
     }
+    $c = $pdo->query("SHOW COLUMNS FROM nido_notes_evaluations LIKE 'max_score'")->fetchAll();
+    if (empty($c)) {
+        $pdo->exec("ALTER TABLE nido_notes_evaluations ADD COLUMN max_score DECIMAL(6,2) NOT NULL DEFAULT 10 AFTER weight");
+    }
 }
 migrate();
 

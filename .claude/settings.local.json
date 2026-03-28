@@ -16,7 +16,8 @@
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git status 2>&1 && echo ---DONE---\")",
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git add -A && git status\")",
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git add -A && git status && git diff --cached --stat\")",
-      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git add -A && git commit -m \\\\\"feat: classes, periodes et moyennes annuelles\\\\\" && git push\")"
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && git add -A && git commit -m \\\\\"feat: classes, periodes et moyennes annuelles\\\\\" && git push\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\ThibautMarchal\\\\Documents\\\\Claude\\\\Nido_notes && npx tsc --noEmit 2>&1 && echo OK\")"
     ]
   }
 }

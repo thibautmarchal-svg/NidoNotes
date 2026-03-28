@@ -6,6 +6,7 @@ import Layout from './components/layout/Layout';
 import AuthPage from './components/auth/AuthPage';
 import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import ClassSelectPage from './components/classes/ClassSelectPage';
+import QuickEntryPage from './components/entry/QuickEntryPage';
 import Dashboard from './components/dashboard/Dashboard';
 import StudentsPage from './components/students/StudentsPage';
 import SubjectsPage from './components/subjects/SubjectsPage';
@@ -44,11 +45,13 @@ function AppRoutes() {
         {currentClass ? (
           <>
             <Route index element={<Dashboard />} />
+            <Route path="/tableau" element={<Dashboard />} />
             <Route path="/eleves" element={<StudentsPage />} />
             <Route path="/matieres" element={<SubjectsPage />} />
             <Route path="/periodes" element={<PeriodsPage />} />
             <Route path="/evaluations" element={<EvaluationsPage />} />
             <Route path="/notes" element={<GradesPage />} />
+            <Route path="/saisie" element={<QuickEntryPage />} />
           </>
         ) : null}
         <Route path="*" element={<Navigate to={currentClass ? '/' : '/classes'} replace />} />

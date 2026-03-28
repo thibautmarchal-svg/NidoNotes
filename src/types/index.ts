@@ -51,6 +51,7 @@ export interface Evaluation {
   subject_id: number;
   sub_subject_id: number | null;
   weight: number;
+  max_score: number;
   created_at?: string;
 }
 

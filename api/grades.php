@@ -38,7 +38,12 @@ if ($method === 'POST') {
     $is_absent     = !empty($d['is_absent']) ? 1 : 0;
     $comment       = isset($d['comment']) ? trim($d['comment']) : null;
     if (!$student_id || !$evaluation_id) err(400, 'student_id et evaluation_id requis');
-    if ($score !== null && ($score < 0 || $score > 10)) err(400, 'Note entre 0 et 10');
+    // Récupérer le max_score de l'évaluation pour valider
+    $ev = db()->prepare("SELECT max_score FROM nido_notes_evaluations WHERE id = ? AND teacher_id = ?");
+    $ev->execute([$evaluation_id, $tid]);
+    $evRow = $ev->fetch();
+    $max = $evRow ? (float)$evRow['max_score'] : 10.0;
+    if ($score !== null && ($score < 0 || $score > $max)) err(400, 'Note entre 0 et ' . $max);
 
     // Vérifier appartenance
     $s1 = db()->prepare("SELECT id FROM nido_notes_students WHERE id = ? AND teacher_id = ?");

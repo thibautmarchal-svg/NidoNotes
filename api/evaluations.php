@@ -11,7 +11,7 @@ if ($method === 'GET') {
     if (!$class_id) err(400, 'class_id requis');
     mustOwnClass($tid, $class_id);
     $s = db()->prepare(
-        "SELECT id, class_id, period_id, name, date, subject_id, sub_subject_id, weight, created_at
+        "SELECT id, class_id, period_id, name, date, subject_id, sub_subject_id, weight, max_score, created_at
          FROM nido_notes_evaluations WHERE class_id = ? AND teacher_id = ? ORDER BY date ASC, name ASC"
     );
     $s->execute([$class_id, $tid]);
@@ -23,28 +23,30 @@ if ($method === 'GET') {
         $r['subject_id']     = (int)$r['subject_id'];
         $r['sub_subject_id'] = $r['sub_subject_id'] !== null ? (int)$r['sub_subject_id'] : null;
         $r['weight']         = (float)$r['weight'];
+        $r['max_score']      = (float)$r['max_score'];
     }
     ok($rows);
 }
 
 if ($method === 'POST') {
-    $d             = input();
-    $class_id      = isset($d['class_id'])      ? (int)$d['class_id']      : 0;
-    $period_id     = isset($d['period_id'])      ? (int)$d['period_id']     : 0;
-    $name          = isset($d['name'])           ? trim($d['name'])          : '';
-    $date          = isset($d['date'])           ? trim($d['date'])          : '';
-    $subject_id    = isset($d['subject_id'])     ? (int)$d['subject_id']    : 0;
+    $d              = input();
+    $class_id       = isset($d['class_id'])       ? (int)$d['class_id']       : 0;
+    $period_id      = isset($d['period_id'])       ? (int)$d['period_id']      : 0;
+    $name           = isset($d['name'])            ? trim($d['name'])           : '';
+    $date           = isset($d['date'])            ? trim($d['date'])           : '';
+    $subject_id     = isset($d['subject_id'])      ? (int)$d['subject_id']     : 0;
     $sub_subject_id = (isset($d['sub_subject_id']) && $d['sub_subject_id'] !== null) ? (int)$d['sub_subject_id'] : null;
-    $weight        = isset($d['weight'])         ? (float)$d['weight']       : 1.0;
+    $weight         = isset($d['weight'])          ? (float)$d['weight']        : 1.0;
+    $max_score      = (isset($d['max_score']) && $d['max_score'] > 0) ? (float)$d['max_score'] : 10.0;
     if (!$class_id || !$period_id || !$name || !$date || !$subject_id) err(400, 'Champs requis manquants');
     mustOwnClass($tid, $class_id);
 
     db()->prepare(
-        "INSERT INTO nido_notes_evaluations (teacher_id, class_id, period_id, name, date, subject_id, sub_subject_id, weight) VALUES (?,?,?,?,?,?,?,?)"
-    )->execute([$tid, $class_id, $period_id, $name, $date, $subject_id, $sub_subject_id, $weight]);
+        "INSERT INTO nido_notes_evaluations (teacher_id, class_id, period_id, name, date, subject_id, sub_subject_id, weight, max_score) VALUES (?,?,?,?,?,?,?,?,?)"
+    )->execute([$tid, $class_id, $period_id, $name, $date, $subject_id, $sub_subject_id, $weight, $max_score]);
     $newId = (int)db()->lastInsertId();
 
-    $s = db()->prepare("SELECT id, class_id, period_id, name, date, subject_id, sub_subject_id, weight, created_at FROM nido_notes_evaluations WHERE id = ?");
+    $s = db()->prepare("SELECT id, class_id, period_id, name, date, subject_id, sub_subject_id, weight, max_score, created_at FROM nido_notes_evaluations WHERE id = ?");
     $s->execute([$newId]);
     $row = $s->fetch();
     $row['id']             = (int)$row['id'];
@@ -53,24 +55,28 @@ if ($method === 'POST') {
     $row['subject_id']     = (int)$row['subject_id'];
     $row['sub_subject_id'] = $row['sub_subject_id'] !== null ? (int)$row['sub_subject_id'] : null;
     $row['weight']         = (float)$row['weight'];
+    $row['max_score']      = (float)$row['max_score'];
     ok($row);
 }
 
 if ($method === 'PUT') {
     if (!$id) err(400, 'ID requis');
     checkOwner($tid, $id);
-    $d             = input();
-    $period_id     = isset($d['period_id'])      ? (int)$d['period_id']     : 0;
-    $name          = isset($d['name'])           ? trim($d['name'])          : '';
-    $date          = isset($d['date'])           ? trim($d['date'])          : '';
-    $subject_id    = isset($d['subject_id'])     ? (int)$d['subject_id']    : 0;
+    $d              = input();
+    $period_id      = isset($d['period_id'])       ? (int)$d['period_id']      : 0;
+    $name           = isset($d['name'])            ? trim($d['name'])           : '';
+    $date           = isset($d['date'])            ? trim($d['date'])           : '';
+    $subject_id     = isset($d['subject_id'])      ? (int)$d['subject_id']     : 0;
     $sub_subject_id = (isset($d['sub_subject_id']) && $d['sub_subject_id'] !== null) ? (int)$d['sub_subject_id'] : null;
-    $weight        = isset($d['weight'])         ? (float)$d['weight']       : 1.0;
+    $weight         = isset($d['weight'])          ? (float)$d['weight']        : 1.0;
+    $max_score      = (isset($d['max_score']) && $d['max_score'] > 0) ? (float)$d['max_score'] : 10.0;
     if (!$period_id || !$name || !$date || !$subject_id) err(400, 'Champs requis manquants');
     db()->prepare(
-        "UPDATE nido_notes_evaluations SET period_id=?, name=?, date=?, subject_id=?, sub_subject_id=?, weight=? WHERE id=? AND teacher_id=?"
-    )->execute([$period_id, $name, $date, $subject_id, $sub_subject_id, $weight, $id, $tid]);
-    ok(['id' => $id, 'period_id' => $period_id, 'name' => $name, 'date' => $date, 'subject_id' => $subject_id, 'sub_subject_id' => $sub_subject_id, 'weight' => $weight]);
+        "UPDATE nido_notes_evaluations SET period_id=?, name=?, date=?, subject_id=?, sub_subject_id=?, weight=?, max_score=? WHERE id=? AND teacher_id=?"
+    )->execute([$period_id, $name, $date, $subject_id, $sub_subject_id, $weight, $max_score, $id, $tid]);
+    ok(['id' => $id, 'period_id' => $period_id, 'name' => $name, 'date' => $date,
+        'subject_id' => $subject_id, 'sub_subject_id' => $sub_subject_id,
+        'weight' => $weight, 'max_score' => $max_score]);
 }
 
 if ($method === 'DELETE') {

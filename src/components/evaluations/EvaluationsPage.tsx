@@ -28,6 +28,7 @@ export default function EvaluationsPage() {
     subject_id: 0,
     sub_subject_id: null as number | null,
     weight: 1,
+    max_score: 10,
   });
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function EvaluationsPage() {
       subject_id: subjects[0]?.id ?? 0,
       sub_subject_id: null,
       weight: 1,
+      max_score: 10,
     });
     setModalOpen(true);
   }
@@ -75,6 +77,7 @@ export default function EvaluationsPage() {
       subject_id: ev.subject_id,
       sub_subject_id: ev.sub_subject_id,
       weight: ev.weight,
+      max_score: ev.max_score ?? 10,
     });
     setModalOpen(true);
   }
@@ -266,6 +269,30 @@ export default function EvaluationsPage() {
             </div>
           )}
           <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Points maximum</label>
+            <div className="flex gap-2 flex-wrap">
+              {[5, 10, 20, 50, 100].map(m => (
+                <button key={m} type="button" onClick={() => setForm(f => ({ ...f, max_score: m }))}
+                  className="px-3 py-2 rounded-xl text-sm font-medium transition"
+                  style={form.max_score === m
+                    ? { background: 'var(--ocre)', color: '#fff', border: '1.5px solid var(--ocre)' }
+                    : { background: 'transparent', color: 'var(--text-secondary)', border: '1.5px solid var(--border-default)' }
+                  }
+                >/{m}</button>
+              ))}
+              <input
+                type="number" min="1" step="1"
+                value={[5,10,20,50,100].includes(form.max_score) ? '' : form.max_score || ''}
+                onChange={e => { const v = parseFloat(e.target.value); if (v > 0) setForm(f => ({ ...f, max_score: v })); }}
+                className="w-20 px-3 py-2 rounded-xl text-sm focus:outline-none"
+                style={{ background: 'var(--bg-raised)', border: '1.5px solid var(--border-default)', color: 'var(--text-primary)' }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--ocre)')}
+                onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+                placeholder="Autre"
+              />
+            </div>
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Pondération</label>
             <div className="flex gap-2">
               {WEIGHTS.map(w => (
@@ -313,6 +340,7 @@ function EvalList({ evals, onEdit, onDelete, subjectName, subSubjectName, period
                   {subSubjectName(ev.sub_subject_id)}
                 </span>
               )}
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--bg-raised)', color: 'var(--text-secondary)' }}>/{ev.max_score ?? 10}</span>
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>×{ev.weight}</span>
             </div>
           </div>

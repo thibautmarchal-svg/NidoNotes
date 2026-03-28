@@ -131,8 +131,9 @@ export default function GradesPage() {
     if (!editCell) return;
     const raw = editValue.replace(',', '.');
     const parsed = raw === '' ? null : parseFloat(raw);
-    if (parsed !== null && (isNaN(parsed) || parsed < 0 || parsed > 10)) {
-      toast('Note entre 0 et 10', 'error');
+    const evalMax = evaluations.find(e => e.id === editCell.evalId)?.max_score ?? 10;
+    if (parsed !== null && (isNaN(parsed) || parsed < 0 || parsed > evalMax)) {
+      toast(`Note entre 0 et ${evalMax}`, 'error');
       return;
     }
     const current = getGrade(editCell.studentId, editCell.evalId);
