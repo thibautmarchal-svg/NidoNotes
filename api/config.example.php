@@ -6,7 +6,7 @@ define('DB_USER', 'tmarchal');
 define('DB_PASS', 'VOTRE_MOT_DE_PASSE');
 
 // Application
-define('APP_URL', 'https://notes.e-nido.app'); // Pas de slash final
+define('APP_URL', 'https://www.thibautmarchal.be'); // Pas de slash final — domaine racine sans /NidoNotes
 
 // Email (SMTP Zoho)
 define('SMTP_HOST', 'smtp.zoho.eu');

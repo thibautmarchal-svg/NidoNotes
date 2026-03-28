@@ -1,6 +1,6 @@
 import type { Student, Subject, SubSubject, Evaluation, Grade, Teacher } from '../types';
 
-const BASE = '/api';
+const BASE = '/NidoNotes/api';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(BASE + url, {

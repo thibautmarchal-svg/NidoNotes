@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/NidoNotes/',
   plugins: [
     react(),
     VitePWA({
@@ -16,7 +17,7 @@ export default defineConfig({
         background_color: '#f8fafc',
         display: 'standalone',
         orientation: 'any',
-        start_url: '/',
+        start_url: '/NidoNotes/',
         icons: [
           {
             src: 'icon-192.png',
