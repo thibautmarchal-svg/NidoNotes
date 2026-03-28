@@ -132,6 +132,28 @@ function migrate(): void
         window_start DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_ip_action (ip_key, action)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    // ── Migrations colonnes manquantes ──────────────────────
+    // Ajoute class_id à subjects si absent (ancienne version)
+    $c = $pdo->query("SHOW COLUMNS FROM nido_notes_subjects LIKE 'class_id'")->fetchAll();
+    if (empty($c)) {
+        $pdo->exec("ALTER TABLE nido_notes_subjects ADD COLUMN class_id INT NOT NULL DEFAULT 0 AFTER teacher_id, ADD INDEX idx_class_subj (class_id)");
+    }
+
+    // Ajoute class_id à students si absent
+    $c = $pdo->query("SHOW COLUMNS FROM nido_notes_students LIKE 'class_id'")->fetchAll();
+    if (empty($c)) {
+        $pdo->exec("ALTER TABLE nido_notes_students ADD COLUMN class_id INT NOT NULL DEFAULT 0 AFTER teacher_id, ADD INDEX idx_class_stud (class_id)");
+    }
+
+    // Ajoute class_id et period_id à evaluations si absents
+    $c = $pdo->query("SHOW COLUMNS FROM nido_notes_evaluations LIKE 'class_id'")->fetchAll();
+    if (empty($c)) {
+        $pdo->exec("ALTER TABLE nido_notes_evaluations ADD COLUMN class_id INT NOT NULL DEFAULT 0 AFTER teacher_id, ADD INDEX idx_class_eval (class_id)");
+    }
+    $c = $pdo->query("SHOW COLUMNS FROM nido_notes_evaluations LIKE 'period_id'")->fetchAll();
+    if (empty($c)) {
+        $pdo->exec("ALTER TABLE nido_notes_evaluations ADD COLUMN period_id INT NOT NULL DEFAULT 0 AFTER class_id, ADD INDEX idx_period_eval (period_id)");
+    }
 }
 migrate();
 
