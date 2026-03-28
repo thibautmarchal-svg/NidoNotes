@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { studentsApi } from '../../lib/api';
 import { useClass } from '../../contexts/ClassContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -7,6 +8,7 @@ import type { Student } from '../../types';
 
 export default function StudentsPage() {
   const toast = useToast();
+  const navigate = useNavigate();
   const { currentClass } = useClass();
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState('');
@@ -130,8 +132,11 @@ export default function StudentsPage() {
           {filtered.map((s, i) => (
             <div
               key={s.id}
-              className={`flex items-center justify-between px-5 py-3.5 ${i > 0 ? 'border-t' : ''}`}
+              className={`flex items-center justify-between px-5 py-3.5 cursor-pointer transition-colors ${i > 0 ? 'border-t' : ''}`}
               style={i > 0 ? { borderColor: 'var(--border-subtle)' } : undefined}
+              onClick={() => navigate(`/eleves/${s.id}`)}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--creme)')}
+              onMouseLeave={e => (e.currentTarget.style.background = '')}
             >
               <div className="flex items-center gap-3">
                 <div
@@ -146,7 +151,7 @@ export default function StudentsPage() {
               </div>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => openEdit(s)}
+                  onClick={e => { e.stopPropagation(); openEdit(s); }}
                   className="w-8 h-8 flex items-center justify-center rounded-lg transition"
                   style={{ color: 'var(--text-muted)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-raised)')}
@@ -157,7 +162,7 @@ export default function StudentsPage() {
                   </svg>
                 </button>
                 <button
-                  onClick={() => handleDelete(s)}
+                  onClick={e => { e.stopPropagation(); handleDelete(s); }}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 transition"
                   onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
