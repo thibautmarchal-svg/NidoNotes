@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Teacher } from '../types';
 import { authApi } from '../lib/api';
-import { clearAll, syncAll as doSyncAll } from '../lib/sync';
+import { syncAll as doSyncAll } from '../lib/sync';
+import { clearAll } from '../lib/db';
 
 interface AuthContextValue {
   user: Teacher | null;
