@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { studentsApi, subjectsApi, evaluationsApi, gradesApi, periodsApi } from '../../lib/api';
 import { useClass } from '../../contexts/ClassContext';
 import type { Student, Subject, Evaluation, Grade, Period } from '../../types';
@@ -32,6 +33,7 @@ function formatScore(score: number | null, decimals = 2): string {
 
 export default function Dashboard() {
   const { currentClass } = useClass();
+  const navigate = useNavigate();
   const [students,    setStudents]    = useState<Student[]>([]);
   const [subjects,    setSubjects]    = useState<Subject[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
@@ -177,8 +179,11 @@ export default function Dashboard() {
               return (
                 <div
                   key={student.id}
-                  className={`flex items-center px-5 py-3.5 gap-3 ${i > 0 ? 'border-t' : ''}`}
+                  onClick={() => navigate(`/eleves/${student.id}`)}
+                  className={`flex items-center px-5 py-3.5 gap-3 cursor-pointer transition-colors ${i > 0 ? 'border-t' : ''}`}
                   style={i > 0 ? { borderColor: 'var(--border-subtle)' } : undefined}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--creme)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = '')}
                 >
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0"
@@ -227,6 +232,9 @@ export default function Dashboard() {
                   >
                     {formatScore(annual, 1)}
                   </div>
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--border-default)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               );
             })}
