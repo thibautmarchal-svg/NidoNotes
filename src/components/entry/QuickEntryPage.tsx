@@ -169,22 +169,38 @@ export default function QuickEntryPage() {
           style={{ background: 'var(--bg-surface)', border: '2px solid var(--ocre)', color: 'var(--text-primary)' }}
         >
           <option value={0}>Choisir un contrôle…</option>
-          {periods.map(p => {
-            const pEvals = evaluations.filter(e => e.period_id === p.id);
-            if (!pEvals.length) return null;
-            return (
-              <optgroup key={p.id} label={p.name}>
-                {pEvals.map(ev => {
-                  const sj = subjects.find(s => s.id === ev.subject_id)?.name ?? '';
-                  const ss = ev.sub_subject_id ? subjects.flatMap(s => s.sub_subjects).find(x => x.id === ev.sub_subject_id)?.name : null;
+          {subjects.map(subject => {
+            // Sous-matières qui ont des évals
+            const subGroups: { label: string; evals: typeof evaluations }[] = [];
+
+            subject.sub_subjects.forEach(ss => {
+              const evs = evaluations
+                .filter(e => e.sub_subject_id === ss.id)
+                .sort((a, b) => b.date.localeCompare(a.date));
+              if (evs.length) subGroups.push({ label: `${subject.name} › ${ss.name}`, evals: evs });
+            });
+
+            // Évals directes (sans sous-matière)
+            const directEvs = evaluations
+              .filter(e => e.subject_id === subject.id && !e.sub_subject_id)
+              .sort((a, b) => b.date.localeCompare(a.date));
+            if (directEvs.length) subGroups.unshift({ label: subject.name, evals: directEvs });
+
+            if (!subGroups.length) return null;
+
+            return subGroups.map(group => (
+              <optgroup key={group.label} label={group.label}>
+                {group.evals.map(ev => {
+                  const period = periods.find(p => p.id === ev.period_id);
+                  const dateStr = new Date(ev.date + 'T00:00:00').toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit' });
                   return (
                     <option key={ev.id} value={ev.id}>
-                      {ev.name} — {ss ? `${sj} / ${ss}` : sj} ({new Date(ev.date + 'T00:00:00').toLocaleDateString('fr-BE', { day: '2-digit', month: '2-digit' })})
+                      {ev.name} ({dateStr}{period ? ` · ${period.name}` : ''})
                     </option>
                   );
                 })}
               </optgroup>
-            );
+            ));
           })}
         </select>
       </div>
