@@ -77,6 +77,15 @@ export interface Objective {
   created_at?: string;
 }
 
+export interface Remark {
+  id?: number;
+  class_id: number;
+  student_id: number;
+  period_id: number;
+  content: string;
+  updated_at?: string;
+}
+
 export interface SyncQueueItem {
   id?: number;
   entity: string;

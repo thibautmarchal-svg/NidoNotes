@@ -1,4 +1,4 @@
-import type { Teacher, Class, Period, Student, Subject, SubSubject, Evaluation, Grade, Objective } from '../types';
+import type { Teacher, Class, Period, Student, Subject, SubSubject, Evaluation, Grade, Objective, Remark } from '../types';
 
 const BASE = '/NidoNotes/api';
 
@@ -93,4 +93,10 @@ export const gradesApi = {
   list: (class_id: number) => request<Grade[]>(`/grades.php?class_id=${class_id}`),
   save: (grade: Grade) =>
     request<Grade>('/grades.php', { method: 'POST', body: JSON.stringify(grade) }),
+};
+
+export const remarksApi = {
+  listForClass: (class_id: number) => request<Remark[]>(`/remarks.php?class_id=${class_id}`),
+  save: (data: Omit<Remark, 'id' | 'updated_at'>) =>
+    request<Remark>('/remarks.php', { method: 'POST', body: JSON.stringify(data) }),
 };
