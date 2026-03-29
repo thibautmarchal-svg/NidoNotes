@@ -75,10 +75,14 @@ const PRINT_CSS = `
 
   .print-table {
     border-collapse: collapse; width: 100%; margin-bottom: 3mm;
+    border: 0.5pt solid #555;
   }
   .print-table th, .print-table td {
     border: 0.5pt solid #555; padding: 1.5mm 2.5mm;
     font-size: 10pt; vertical-align: middle;
+  }
+  .print-table th:last-child, .print-table td:last-child {
+    border-right: 0.5pt solid #555 !important;
   }
   .print-table th {
     background: #ede8e0 !important;
