@@ -74,6 +74,15 @@ export default function Layout() {
                   >
                     Changer de classe
                   </button>
+                  {currentClass && (
+                    <button
+                      onClick={() => { setMenuOpen(false); navigate('/periodes'); }}
+                      className="w-full text-left px-4 py-3 text-sm transition-colors hover:opacity-80"
+                      style={{ color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-subtle)' }}
+                    >
+                      Gérer les périodes
+                    </button>
+                  )}
                   <button
                     onClick={() => { setMenuOpen(false); logout(); }}
                     className="w-full text-left px-4 py-3 text-sm transition-colors hover:opacity-80"

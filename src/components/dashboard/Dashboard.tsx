@@ -166,80 +166,71 @@ export default function Dashboard() {
           {/* Liste élèves avec moyennes par période */}
           <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Moyennes par élève</h2>
           <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-            {/* Header périodes */}
-            {periods.length > 0 && (
-              <div className="flex items-center px-5 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-raised)' }}>
-                <div className="flex-1" />
-                {periods.map(p => (
-                  <div key={p.id} className="w-20 text-center text-xs font-semibold" style={{ color: 'var(--ocre)' }}>{p.name}</div>
-                ))}
-                <div className="w-16 text-center text-xs font-bold" style={{ color: 'var(--terre)' }}>Annuel</div>
-              </div>
-            )}
-            {students.map((student, i) => {
-              const annual = avgAnnual(student.id);
-              return (
-                <div
-                  key={student.id}
-                  onClick={() => navigate(`/eleves/${student.id}`)}
-                  className={`flex items-center px-5 py-3.5 gap-3 cursor-pointer transition-colors ${i > 0 ? 'border-t' : ''}`}
-                  style={i > 0 ? { borderColor: 'var(--border-subtle)' } : undefined}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--creme)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = '')}
-                >
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0"
-                    style={{ background: 'var(--creme)', color: 'var(--ocre)' }}
-                  >
-                    {student.first_name.charAt(0)}{student.last_name.charAt(0)}
+            <div className="overflow-x-auto">
+              <div style={{ minWidth: `${300 + periods.length * 72 + 72}px` }}>
+                {/* Header périodes */}
+                {periods.length > 0 && (
+                  <div className="flex items-center px-4 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-raised)' }}>
+                    <div style={{ flex: '1 1 160px', minWidth: 0 }} />
+                    {periods.map(p => (
+                      <div key={p.id} className="text-center text-xs font-semibold truncate px-1" style={{ width: 72, flexShrink: 0, color: 'var(--ocre)' }}>{p.name}</div>
+                    ))}
+                    <div className="text-center text-xs font-bold" style={{ width: 72, flexShrink: 0, color: 'var(--terre)' }}>Annuel</div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
-                      {student.last_name} {student.first_name}
+                )}
+
+                {students.map((student, i) => {
+                  const annual = avgAnnual(student.id);
+                  return (
+                    <div
+                      key={student.id}
+                      onClick={() => navigate(`/eleves/${student.id}`)}
+                      className={`flex items-center px-4 py-3 gap-3 cursor-pointer ${i > 0 ? 'border-t' : ''}`}
+                      style={i > 0 ? { borderColor: 'var(--border-subtle)' } : undefined}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--creme)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '')}
+                    >
+                      {/* Avatar */}
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs flex-shrink-0"
+                        style={{ background: 'var(--creme)', color: 'var(--ocre)' }}
+                      >
+                        {student.first_name.charAt(0)}{student.last_name.charAt(0)}
+                      </div>
+
+                      {/* Nom */}
+                      <div style={{ flex: '1 1 160px', minWidth: 0 }}>
+                        <div className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                          {student.last_name} {student.first_name}
+                        </div>
+                      </div>
+
+                      {/* Moyennes par période */}
+                      {periods.map(p => {
+                        const avg = avgGeneralInPeriod(student.id, p.id);
+                        return (
+                          <div key={p.id} className="text-center flex-shrink-0" style={{ width: 72 }}>
+                            {avg !== null ? (
+                              <span className={`text-sm font-semibold ${scoreColor(avg)}`}>{formatScore(avg, 1)}</span>
+                            ) : (
+                              <span className="text-sm" style={{ color: 'var(--border-default)' }}>—</span>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Moyenne annuelle */}
+                      <div
+                        className={`h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${scoreColor(annual)}`}
+                        style={{ ...scoreBg(annual), width: 72 }}
+                      >
+                        {formatScore(annual, 1)}
+                      </div>
                     </div>
-                    {subjects.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-0.5">
-                        {subjects.map(s => {
-                          const periodAvgs = periods.map(p => avgSubjectInPeriod(student.id, s, p.id));
-                          const hasAny = periodAvgs.some(v => v !== null);
-                          if (!hasAny) return null;
-                          return (
-                            <span key={s.id} className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                              {s.name}: {periodAvgs.map((avg, pi) => avg !== null ? (
-                                <span key={pi} className={`font-semibold ${scoreColor(avg)}`}>{formatScore(avg, 1)}</span>
-                              ) : null).filter(Boolean).map((el, idx, arr) => idx < arr.length - 1 ? [el, <span key={`sep-${idx}`} style={{ color: 'var(--border-default)' }}> · </span>] : el)}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  {/* Moyennes par période */}
-                  {periods.map(p => {
-                    const avg = avgGeneralInPeriod(student.id, p.id);
-                    return (
-                      <div key={p.id} className="w-20 text-center flex-shrink-0">
-                        {avg !== null ? (
-                          <span className={`text-sm font-semibold ${scoreColor(avg)}`}>{formatScore(avg, 1)}</span>
-                        ) : (
-                          <span className="text-sm" style={{ color: 'var(--border-default)' }}>—</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                  {/* Moyenne annuelle */}
-                  <div
-                    className={`w-16 h-12 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${scoreColor(annual)}`}
-                    style={scoreBg(annual)}
-                  >
-                    {formatScore(annual, 1)}
-                  </div>
-                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--border-default)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </>
       )}
