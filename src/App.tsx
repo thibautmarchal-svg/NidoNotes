@@ -15,6 +15,7 @@ import PeriodsPage from './components/periods/PeriodsPage';
 import EvaluationsPage from './components/evaluations/EvaluationsPage';
 import GradesPage from './components/grades/GradesPage';
 import ObjectivesPage from './components/objectives/ObjectivesPage';
+import BulletinsPage from './components/bulletins/BulletinsPage';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -55,6 +56,7 @@ function AppRoutes() {
             <Route path="/notes" element={<GradesPage />} />
             <Route path="/saisie" element={<QuickEntryPage />} />
             <Route path="/objectifs" element={<ObjectivesPage />} />
+            <Route path="/bulletins" element={<BulletinsPage />} />
             <Route path="/eleves/:studentId" element={<StudentDetailPage />} />
           </>
         ) : null}
