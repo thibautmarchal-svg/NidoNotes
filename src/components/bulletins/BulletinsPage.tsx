@@ -99,6 +99,15 @@ const PRINT_CSS = `
   }
   .print-remark strong { display: block; font-size: 10pt; margin-bottom: 1.5mm; }
   .print-remark p { font-size: 10pt; margin: 0; white-space: pre-wrap; }
+
+  .print-signatures {
+    margin-top: 8mm; display: flex !important; gap: 6mm;
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .print-signature-box {
+    flex: 1; border: 0.5pt solid #555; padding: 2.5mm 3mm; min-height: 20mm;
+  }
+  .print-signature-box strong { display: block; font-size: 9pt; margin-bottom: 1mm; }
 }
 `;
 
@@ -457,13 +466,37 @@ export default function BulletinsPage() {
               </div>
             </div>
 
-            {/* Impression */}
+            {/* Impression — remarque */}
             {remarkText && (
               <div className="print-only print-remark" style={{ display: 'none' }}>
                 <strong>Remarque</strong>
                 <p>{remarkText}</p>
               </div>
             )}
+
+            {/* Écran — signatures */}
+            <div className="no-print rounded-2xl p-4"
+              style={{ border: '1px solid var(--border-default)', background: 'var(--bg-surface)' }}>
+              <p className="text-xs font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>
+                Signatures
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {['Direction', 'Enseignant(e)', 'Parents'].map(label => (
+                  <div key={label} className="rounded-xl p-3" style={{ border: '1px solid var(--border-subtle)', minHeight: '64px' }}>
+                    <p className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Impression — signatures */}
+            <div className="print-only print-signatures" style={{ display: 'none' }}>
+              {['Direction', 'Enseignant(e)', 'Parents'].map(label => (
+                <div key={label} className="print-signature-box">
+                  <strong>{label}</strong>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
