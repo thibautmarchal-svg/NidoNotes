@@ -180,7 +180,8 @@ export default function GradesPage() {
     const evs = evaluations.filter(e => e.sub_subject_id === subSubjectId && e.period_id === periodId);
     return calcWeightedAvg(evs.map(e => {
       const g = getGrade(studentId, e.id);
-      return { score: g?.score ?? null, weight: e.weight, is_absent: g?.is_absent ?? false };
+      const norm = g?.score != null ? (Number(g.score) / (Number(e.max_score) || 10)) * 10 : null;
+      return { score: norm, weight: e.weight, is_absent: g?.is_absent ?? false };
     }));
   }
 
@@ -193,7 +194,8 @@ export default function GradesPage() {
     const directEvs = evaluations.filter(e => e.subject_id === subject.id && !e.sub_subject_id && e.period_id === periodId);
     const directAvg = calcWeightedAvg(directEvs.map(e => {
       const g = getGrade(studentId, e.id);
-      return { score: g?.score ?? null, weight: e.weight, is_absent: g?.is_absent ?? false };
+      const norm = g?.score != null ? (Number(g.score) / (Number(e.max_score) || 10)) * 10 : null;
+      return { score: norm, weight: e.weight, is_absent: g?.is_absent ?? false };
     }));
     if (directAvg !== null) vals.push(directAvg);
     if (!vals.length) return null;

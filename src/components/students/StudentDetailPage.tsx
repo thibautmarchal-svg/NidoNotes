@@ -87,7 +87,8 @@ export default function StudentDetailPage() {
     const evs = evalsForSubSubject(ssId, periodId);
     return calcWeightedAvg(evs.map(e => {
       const g = gradeOf(e.id);
-      return { score: g?.score ?? null, weight: e.weight, is_absent: g?.is_absent ?? false };
+      const norm = g?.score != null ? (Number(g.score) / (Number(e.max_score) || 10)) * 10 : null;
+      return { score: norm, weight: e.weight, is_absent: g?.is_absent ?? false };
     }));
   }
 
@@ -100,7 +101,8 @@ export default function StudentDetailPage() {
     const directEvs = evalsDirectForSubject(subject.id, periodId);
     const da = calcWeightedAvg(directEvs.map(e => {
       const g = gradeOf(e.id);
-      return { score: g?.score ?? null, weight: e.weight, is_absent: g?.is_absent ?? false };
+      const norm = g?.score != null ? (Number(g.score) / (Number(e.max_score) || 10)) * 10 : null;
+      return { score: norm, weight: e.weight, is_absent: g?.is_absent ?? false };
     }));
     if (da !== null) vals.push(da);
     if (!vals.length) return null;
