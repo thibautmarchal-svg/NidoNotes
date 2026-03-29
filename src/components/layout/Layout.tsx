@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useClass } from '../../contexts/ClassContext';
 import { useState } from 'react';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -12,6 +13,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const isOnline = useOnlineStatus();
+  const { canInstall, install, dismiss } = useInstallPrompt();
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
@@ -85,6 +87,37 @@ export default function Layout() {
           </div>
         </div>
       </header>
+
+      {/* Bandeau installation PWA */}
+      {canInstall && (
+        <div
+          className="flex items-center gap-3 px-4 py-2.5"
+          style={{ background: 'var(--ocre)', color: 'var(--terre)' }}
+        >
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span className="flex-1 text-sm font-medium">
+            Installer Nido Notes comme application
+          </span>
+          <button
+            onClick={install}
+            className="text-sm font-bold px-3 py-1 rounded-lg transition-opacity hover:opacity-80 flex-shrink-0"
+            style={{ background: 'var(--terre)', color: 'var(--creme)' }}
+          >
+            Installer
+          </button>
+          <button
+            onClick={dismiss}
+            className="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+            aria-label="Fermer"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 pb-24">
