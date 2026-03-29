@@ -21,6 +21,9 @@ jobs:
       - name: Installer les dépendances
         run: npm install
 
+      - name: Générer les icônes PWA
+        run: npx --yes @vite-pwa/assets-generator --preset minimal-2023 public/favicon.svg
+
       - name: Build React
         run: npm run build
 

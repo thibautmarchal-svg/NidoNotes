@@ -18,7 +18,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header style={{ background: 'var(--terre)', boxShadow: 'var(--shadow-md)' }} className="sticky top-0 z-30">
+      <header style={{ background: 'var(--terre)', boxShadow: 'var(--shadow-md)' }} className="sticky top-0 z-30 print:hidden">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--ocre)' }}>
@@ -91,7 +91,7 @@ export default function Layout() {
       {/* Bandeau installation PWA */}
       {canInstall && (
         <div
-          className="flex items-center gap-3 px-4 py-2.5"
+          className="print:hidden flex items-center gap-3 px-4 py-2.5"
           style={{ background: 'var(--ocre)', color: 'var(--terre)' }}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@ export default function Layout() {
       )}
 
       {/* Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 pb-24">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 pb-24 print:max-w-none print:p-0">
         <Outlet />
       </main>
 
